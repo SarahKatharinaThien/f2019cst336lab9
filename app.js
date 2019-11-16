@@ -33,7 +33,7 @@ function dbConnection() {
         user: "vj509zbztccrawn8",
         password: "cb3j3wge6ncy5pxp",
         database: "r2rnsd5qlpobjp9s"
-    })
+    });
     return conn;
 };
 
