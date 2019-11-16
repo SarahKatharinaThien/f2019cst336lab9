@@ -17,7 +17,7 @@ app.get("/dbTest", function(req, res) {
         if(err) throw err;
         console.log("Connected!");
 
-        let sql = "SELECT CURDATE()";
+        let sql = "SELECT * FROM l9_author";
 
         conn.query(sql, function(err, rows, fields) {
             if(err) throw err;
