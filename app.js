@@ -9,6 +9,30 @@ app.get("/", function(req, res) {
    res.render("index");
 }); // root
 
+app.get("/quotes", function(req, res) {
+    let keyword = req.query.keyword;
+    console.log(keyword);
+
+    let conn = dbConnection();
+
+    conn.connect(function(err) {
+        if(err) throw err;
+        console.log("Connected!");
+
+        let sql = `SELECT quote, lastName, category 
+                   FROM l9_quotes 
+                   NATURAL JOIN l9_author 
+                   WHERE quote LIKE '%${keyword}%'`;
+
+        conn.query(sql, function(err, rows, fields) {
+            if(err) throw err;
+            res.send(rows);
+        });
+    });
+
+    // res.render("quotes");
+}); // quotes
+
 app.get("/dbTest", function(req, res) {
 
     let conn = dbConnection();
