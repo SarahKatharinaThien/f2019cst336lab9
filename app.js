@@ -6,7 +6,7 @@ app.use(express.static("public"));
 
 // routes
 app.get("/", function(req, res) {
-   res.send("it works!");
+   res.render("index");
 }); // root
 
 app.get("/dbTest", function(req, res) {
