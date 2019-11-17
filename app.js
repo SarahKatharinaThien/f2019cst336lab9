@@ -19,6 +19,7 @@ app.get("/quotes", async function(req, res) {
 
 function getQuotes(query) {
     let keyword = query.keyword;
+    let category = query.category;
 
     let conn = dbConnection();
 
