@@ -9,29 +9,33 @@ app.get("/", function(req, res) {
    res.render("index");
 }); // root
 
-app.get("/quotes", function(req, res) {
-    let keyword = req.query.keyword;
-    console.log(keyword);
+app.get("/quotes", async function(req, res) {
+    let rows = await getQuotes(req.query);
+    res.render("quotes", {records: rows});
+}); // quotes
+
+function getQuotes(query) {
+    let keyword = query.keyword;
 
     let conn = dbConnection();
 
-    conn.connect(function(err) {
-        if(err) throw err;
-        console.log("Connected!");
+    return new Promise(function(resolve, reject) {
+        conn.connect(function(err) {
+            if(err) throw err;
+            console.log("Connected!");
 
-        let sql = `SELECT quote, lastName, category 
+            let sql = `SELECT quote, lastName, category 
                    FROM l9_quotes 
                    NATURAL JOIN l9_author 
                    WHERE quote LIKE '%${keyword}%'`;
 
-        conn.query(sql, function(err, rows, fields) {
-            if(err) throw err;
-            res.send(rows);
-        });
-    });
-
-    // res.render("quotes");
-}); // quotes
+            conn.query(sql, function(err, rows, fields) {
+                if(err) throw err;
+                resolve(rows);
+            });
+        }); // connect
+    }); // promise
+} // getQuotes
 
 app.get("/dbTest", function(req, res) {
 
