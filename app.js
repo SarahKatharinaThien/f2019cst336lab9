@@ -24,7 +24,7 @@ function getQuotes(query) {
             if(err) throw err;
             console.log("Connected!");
 
-            let sql = `SELECT quote, lastName, category 
+            let sql = `SELECT quote, firstName, lastName, category 
                    FROM l9_quotes 
                    NATURAL JOIN l9_author 
                    WHERE quote LIKE '%${keyword}%'`;
