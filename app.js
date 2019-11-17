@@ -5,8 +5,11 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 
 // routes
-app.get("/", function(req, res) {
-   res.render("index");
+app.get("/", async function(req, res) {
+
+    let categories = await getCategories();
+    console.log(categories);
+   res.render("index", {"categories": categories});
 }); // root
 
 app.get("/quotes", async function(req, res) {
@@ -36,6 +39,27 @@ function getQuotes(query) {
         }); // connect
     }); // promise
 } // getQuotes
+
+function getCategories() {
+
+    let conn = dbConnection();
+
+    return new Promise(function(resolve, reject) {
+        conn.connect(function(err) {
+            if(err) throw err;
+            console.log("Connected!");
+
+            let sql = `SELECT DISTINCT category 
+                       FROM l9_quotes
+                       ORDER BY category`;
+
+            conn.query(sql, function(err, rows, fields) {
+                if(err) throw err;
+                resolve(rows);
+            });
+        }); // connect
+    }); // promise
+} // getCategories
 
 app.get("/dbTest", function(req, res) {
 
