@@ -32,6 +32,10 @@ function getQuotes(query) {
                    NATURAL JOIN l9_author 
                    WHERE quote LIKE '%${keyword}%'`;
 
+            if (category) { // if the user selected a quote category
+                sql += ` AND category = '${category}'`;
+            }
+
             conn.query(sql, function(err, rows, fields) {
                 if(err) throw err;
                 resolve(rows);
