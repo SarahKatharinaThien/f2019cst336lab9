@@ -31,21 +31,31 @@ function getQuotes(query) {
             if(err) throw err;
             console.log("Connected!");
 
-            let sql = `SELECT quote, firstName, lastName, category 
-                   FROM l9_quotes 
-                   NATURAL JOIN l9_author 
-                   WHERE quote LIKE '%${keyword}%'`;
+            let sql = `SELECT quote, firstName, lastName 
+                       FROM l9_quotes 
+                       NATURAL JOIN l9_author 
+                       WHERE quote LIKE '%${keyword}%'`;
 
             if (category) { // if the user selected a quote category
-                sql += ` AND category = '${category}'`;
+                sql = `SELECT quote, firstName, lastName, category
+                       FROM l9_quotes
+                       NATURAL JOIN l9_author
+                       WHERE category = '${category}'`;
             }
 
             if(lastName) { // if the user selected an author's name
-                sql += ` AND lastName = '${lastName}'`; // need to change to join
+                sql = `SELECT quote, firstName, lastName
+                       FROM l9_quotes
+                       NATURAL JOIN l9_author
+                       WHERE firstName = '${firstName}' 
+                       AND lastName = '${lastName}'`; // need to get full name
             }
 
             if (gender) { // if the user selected an author's gender
-                sql += ` AND gender = '${gender}'`; // need to change to join
+                sql = `SELECT quote, firstName, lastName, sex
+                       FROM l9_quotes q
+                       NATURAL JOIN l9_author a
+                       WHERE sex = '${gender}'`;
             }
 
             conn.query(sql, function(err, rows, fields) {
