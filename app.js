@@ -8,8 +8,9 @@ app.use(express.static("public"));
 app.get("/", async function(req, res) {
 
     let categories = await getCategories();
-    console.log(categories);
-   res.render("index", {"categories": categories});
+    let lastName = await getLastNames();
+    let gender = await getGenders();
+   res.render("index", {"categories": categories, "lastName": lastName, "gender": gender});
 }); // root
 
 app.get("/quotes", async function(req, res) {
@@ -20,6 +21,8 @@ app.get("/quotes", async function(req, res) {
 function getQuotes(query) {
     let keyword = query.keyword;
     let category = query.category;
+    let lastName = query.lastName;
+    let gender = query.gender;
 
     let conn = dbConnection();
 
@@ -35,6 +38,14 @@ function getQuotes(query) {
 
             if (category) { // if the user selected a quote category
                 sql += ` AND category = '${category}'`;
+            }
+
+            if(lastName) { // if the user selected an author's name
+                sql += ` AND lastName = '${lastName}'`; // need to change to join
+            }
+
+            if (gender) { // if the user selected an author's gender
+                sql += ` AND gender = '${gender}'`; // need to change to join
             }
 
             conn.query(sql, function(err, rows, fields) {
@@ -57,6 +68,48 @@ function getCategories() {
             let sql = `SELECT DISTINCT category 
                        FROM l9_quotes
                        ORDER BY category`;
+
+            conn.query(sql, function(err, rows, fields) {
+                if(err) throw err;
+                resolve(rows);
+            });
+        }); // connect
+    }); // promise
+} // getCategories
+
+function getLastNames() {
+
+    let conn = dbConnection();
+
+    return new Promise(function(resolve, reject) {
+        conn.connect(function(err) {
+            if(err) throw err;
+            console.log("Connected!");
+
+            let sql = `SELECT DISTINCT lastName 
+                       FROM l9_author
+                       ORDER BY lastName`;
+
+            conn.query(sql, function(err, rows, fields) {
+                if(err) throw err;
+                resolve(rows);
+            });
+        }); // connect
+    }); // promise
+} // getCategories
+
+function getGenders() {
+
+    let conn = dbConnection();
+
+    return new Promise(function(resolve, reject) {
+        conn.connect(function(err) {
+            if(err) throw err;
+            console.log("Connected!");
+
+            let sql = `SELECT DISTINCT gender 
+                       FROM l9_gender
+                       ORDER BY gender`;
 
             conn.query(sql, function(err, rows, fields) {
                 if(err) throw err;

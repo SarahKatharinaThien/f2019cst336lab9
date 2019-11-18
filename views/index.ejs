@@ -16,6 +16,22 @@
 
                     <% }); %>
                   </select>
+        Author's name: <select name="lastName">
+            <option>Select One</option>
+            <% lastName.forEach(function(i) { %>
+
+                <option><%= i.lastName %></option>
+
+            <% }); %>
+        </select>
+        Author's gender: <select name="gender">
+            <option>Select One</option>
+            <% gender.forEach(function(i) { %>
+
+                <option><%= i.gender %></option>
+
+            <% }); %>
+        </select>
         <button>Search!</button>
     </form>
 
