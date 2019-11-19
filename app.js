@@ -45,9 +45,8 @@ function getAuthorInfo(authorId) {
 
 function getQuotes(query) {
     let keyword = query.keyword;
-    let author = query.author;
+    let author = query.firstName;
     let name = author.split(' ');
-    console.log(query.sex);
 
     let conn = dbConnection();
 
@@ -65,22 +64,21 @@ function getQuotes(query) {
             if (query.category) { //user selected a category
                 sql += " AND q.category = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
             }
-            if (author) { //user selected a category
-                sql += " AND a.firstName = ? AND a.lastName = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
+            if (author) { //user selected an author
+                sql += " AND a.firstName = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
             }
-            if (query.sex) { //user selected a gender
+            if (query.sex) { //user selected the authors gender
                 sql += " AND a.sex = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
             }
-            params.push(query.category, name[0], name[1], query.sex);
-
-            console.log(params);
+            params.push(query.category);
+            params.push(name[0]);
+            params.push(query.sex);
 
             console.log("SQL:", sql);
-            console.log("first name:", name[0]);
+            console.log(params);
 
-            conn.query(sql, params, function (err, rows, fields) {
+            conn.query(sql, params,function (err, rows, fields) {
                 if (err) throw err;
-                //res.send(rows);
                 conn.end();
                 resolve(rows);
             });
@@ -152,13 +150,13 @@ app.get("/dbTest", function (req, res) {
 
 function dbConnection() {
     let conn = mysql.createConnection({
-        host: "if0ck476y7axojpg.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
-        user: "vj509zbztccrawn8",
-        password: "cb3j3wge6ncy5pxp",
-        database: "r2rnsd5qlpobjp9s"
-    });
+        host: "gmgcjwawatv599gq.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+        user: "vr51fr35ztycmd35",
+        password: "pfoyhzg1z1yusckl",
+        database: "s0potvjirbd4ea7f"
+    });//createConnection
     return conn;
-};
+}
 
 // starting server
 app.listen(process.env.PORT || 3000, process.env.IP, function () {
