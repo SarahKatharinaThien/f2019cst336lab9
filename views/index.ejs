@@ -18,9 +18,9 @@
                   </select>
         Author's name: <select name="authorName">
             <option>Select One</option>
-            <% lastName.forEach(function(i) { %>
+            <% lastName.forEach(function(i) { %> // need to display first name and last name
 
-                <option><%= i.firstName + i.lastName %></option>
+                <option><%= i.lastName %></option>
 
             <% }); %>
         </select>
