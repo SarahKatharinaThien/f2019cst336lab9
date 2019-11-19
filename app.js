@@ -68,10 +68,10 @@ function getQuotes(query) {
             if (author) { //user selected a category
                 sql += " AND a.firstName = ? AND a.lastName = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
             }
-            if (query.sex) { //user selected a category
+            if (query.sex) { //user selected a gender
                 sql += " AND a.sex = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
             }
-            params.push(query.category, name[0], name[1]);
+            params.push(query.category, name[0], name[1], query.sex);
 
             console.log(params);
 
