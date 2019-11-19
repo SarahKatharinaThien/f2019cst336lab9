@@ -16,11 +16,11 @@
 
                     <% }); %>
                   </select>
-        Author's name: <select name="lastName">
+        Author's name: <select name="authorName">
             <option>Select One</option>
             <% lastName.forEach(function(i) { %>
 
-                <option><%= i.lastName %></option>
+                <option><%= i.firstName + i.lastName %></option>
 
             <% }); %>
         </select>

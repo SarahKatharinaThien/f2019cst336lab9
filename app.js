@@ -8,9 +8,10 @@ app.use(express.static("public"));
 app.get("/", async function(req, res) {
 
     let categories = await getCategories();
+    let firstName = await getFirstNames();
     let lastName = await getLastNames();
     let gender = await getGenders();
-   res.render("index", {"categories": categories, "lastName": lastName, "gender": gender});
+   res.render("index", {"categories": categories, "firstName": firstName, "lastName": lastName, "gender": gender});
 }); // root
 
 app.get("/quotes", async function(req, res) {
@@ -18,10 +19,10 @@ app.get("/quotes", async function(req, res) {
     res.render("quotes", {records: rows});
 }); // quotes
 
-function getQuotes(query) {
+function getQuotesByKeyword(query) {
     let keyword = query.keyword;
     let category = query.category;
-    let lastName = query.lastName;
+    let authorName = query.authorName;
     let gender = query.gender;
 
     let conn = dbConnection();
@@ -43,12 +44,11 @@ function getQuotes(query) {
                        WHERE category = '${category}'`;
             }
 
-            if(lastName) { // if the user selected an author's name
+            if(authorName) { // if the user selected an author's name
                 sql = `SELECT quote, firstName, lastName
                        FROM l9_quotes
                        NATURAL JOIN l9_author
-                       WHERE firstName = '${firstName}' 
-                       AND lastName = '${lastName}'`; // need to get full name
+                       WHERE lastName = '${lastName}'`;
             }
 
             if (gender) { // if the user selected an author's gender
@@ -78,6 +78,27 @@ function getCategories() {
             let sql = `SELECT DISTINCT category 
                        FROM l9_quotes
                        ORDER BY category`;
+
+            conn.query(sql, function(err, rows, fields) {
+                if(err) throw err;
+                resolve(rows);
+            });
+        }); // connect
+    }); // promise
+} // getCategories
+
+function getFirstNames() {
+
+    let conn = dbConnection();
+
+    return new Promise(function(resolve, reject) {
+        conn.connect(function(err) {
+            if(err) throw err;
+            console.log("Connected!");
+
+            let sql = `SELECT DISTINCT lastName 
+                       FROM l9_author
+                       ORDER BY firstName`;
 
             conn.query(sql, function(err, rows, fields) {
                 if(err) throw err;
