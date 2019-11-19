@@ -1,173 +1,155 @@
-const express = require('express');
-const mysql = require('mysql');
+const express = require("express");
+const mysql = require("mysql");
 const app = express();
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 
-// routes
-app.get("/", async function(req, res) {
-
+//routes
+app.get("/", async function (req, res) {
     let categories = await getCategories();
-    let firstName = await getFirstNames();
-    let lastName = await getLastNames();
-    let gender = await getGenders();
-   res.render("index", {"categories": categories, "firstName": firstName, "lastName": lastName, "gender": gender});
-}); // root
+    let authors = await getAuthors();
+    res.render("index", {"categories": categories, "authors": authors});
+});//root
 
-app.get("/quotes", async function(req, res) {
+app.get("/quotes", async function (req, res) {
     let rows = await getQuotes(req.query);
-    res.render("quotes", {records: rows});
-}); // quotes
+    res.render("quotes", {"records": rows});
+});//quotes
 
-function getQuotesByKeyword(query) {
-    let keyword = query.keyword;
-    let category = query.category;
-    let authorName = query.authorName;
-    let gender = query.gender;
+app.get("/authorInfo", async function (req, res) {
+    let rows = await getAuthorInfo(req.query.authorId);
+    res.render("quotes", {"authors": rows});
+});//authorInfo
 
+function getAuthorInfo(authorId) {
     let conn = dbConnection();
 
-    return new Promise(function(resolve, reject) {
-        conn.connect(function(err) {
-            if(err) throw err;
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
             console.log("Connected!");
 
-            let sql = `SELECT quote, firstName, lastName 
-                       FROM l9_quotes 
-                       NATURAL JOIN l9_author 
-                       WHERE quote LIKE '%${keyword}%'`;
-
-            if (category) { // if the user selected a quote category
-                sql = `SELECT quote, firstName, lastName, category
-                       FROM l9_quotes
-                       NATURAL JOIN l9_author
-                       WHERE category = '${category}'`;
-            }
-
-            if(authorName) { // if the user selected an author's name
-                sql = `SELECT quote, firstName, lastName
-                       FROM l9_quotes
-                       NATURAL JOIN l9_author
-                       WHERE lastName = '${lastName}'`;
-            }
-
-            if (gender) { // if the user selected an author's gender
-                sql = `SELECT quote, firstName, lastName, sex
-                       FROM l9_quotes q
-                       NATURAL JOIN l9_author a
-                       WHERE sex = '${gender}'`;
-            }
-
-            conn.query(sql, function(err, rows, fields) {
-                if(err) throw err;
+            let sql = `SELECT * 
+                      FROM l9_author
+                      WHERE authorId = ${authorId}`;
+            console.log(sql);
+            conn.query(sql, function (err, rows, fields) {
+                if (err) throw err;
+                //res.send(rows);
+                conn.end();
                 resolve(rows);
             });
-        }); // connect
-    }); // promise
-} // getQuotes
+        });//connect
+    });//promise
+}//getAuthorInfo
 
-function getCategories() {
+function getQuotes(query) {
+    let keyword = query.keyword;
+    let author = query.author;
+    let name = author.split(' ');
+    console.log(query.sex);
 
     let conn = dbConnection();
 
-    return new Promise(function(resolve, reject) {
-        conn.connect(function(err) {
-            if(err) throw err;
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
+            console.log("Connected!");
+
+            let params = [];
+            let sql = `SELECT q.quote, a.firstName, a.lastName, q.category, a.authorId FROM l9_quotes q
+                      NATURAL JOIN l9_author a
+                      WHERE 
+                      q.quote LIKE '%${keyword}%'`;
+
+            if (query.category) { //user selected a category
+                sql += " AND q.category = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
+            }
+            if (author) { //user selected a category
+                sql += " AND a.firstName = ? AND a.lastName = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
+            }
+            if (query.sex) { //user selected a category
+                sql += " AND a.sex = ?"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
+            }
+            params.push(query.category, name[0], name[1]);
+
+            console.log(params);
+
+            console.log("SQL:", sql);
+            console.log("first name:", name[0]);
+
+            conn.query(sql, params, function (err, rows, fields) {
+                if (err) throw err;
+                //res.send(rows);
+                conn.end();
+                resolve(rows);
+            });
+        });//connect
+    });//promise
+}//getQuotes
+
+
+function getCategories() {
+    let conn = dbConnection();
+
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
             console.log("Connected!");
 
             let sql = `SELECT DISTINCT category 
-                       FROM l9_quotes
-                       ORDER BY category`;
+                      FROM l9_quotes
+                      ORDER BY category`;
 
-            conn.query(sql, function(err, rows, fields) {
-                if(err) throw err;
+            conn.query(sql, function (err, rows, fields) {
+                if (err) throw err;
+                //res.send(rows);
+                conn.end();
                 resolve(rows);
             });
-        }); // connect
-    }); // promise
-} // getCategories
+        });//connect
+    });//promise
+}//getCategories
 
-function getFirstNames() {
-
+function getAuthors() {
     let conn = dbConnection();
 
-    return new Promise(function(resolve, reject) {
-        conn.connect(function(err) {
-            if(err) throw err;
+    return new Promise(function (resolve, reject) {
+        conn.connect(function (err) {
+            if (err) throw err;
             console.log("Connected!");
 
-            let sql = `SELECT DISTINCT lastName 
-                       FROM l9_author
-                       ORDER BY firstName`;
+            let sql = `SELECT DISTINCT firstName, lastName 
+                      FROM l9_author
+                      ORDER BY firstName`;
 
-            conn.query(sql, function(err, rows, fields) {
-                if(err) throw err;
+            conn.query(sql, function (err, rows, fields) {
+                if (err) throw err;
+                //res.send(rows);
+                conn.end();
                 resolve(rows);
             });
-        }); // connect
-    }); // promise
-} // getCategories
+        });//connect
+    });//promise
+}//getCategories
 
-function getLastNames() {
-
+app.get("/dbTest", function (req, res) {
     let conn = dbConnection();
 
-    return new Promise(function(resolve, reject) {
-        conn.connect(function(err) {
-            if(err) throw err;
-            console.log("Connected!");
-
-            let sql = `SELECT DISTINCT lastName 
-                       FROM l9_author
-                       ORDER BY lastName`;
-
-            conn.query(sql, function(err, rows, fields) {
-                if(err) throw err;
-                resolve(rows);
-            });
-        }); // connect
-    }); // promise
-} // getCategories
-
-function getGenders() {
-
-    let conn = dbConnection();
-
-    return new Promise(function(resolve, reject) {
-        conn.connect(function(err) {
-            if(err) throw err;
-            console.log("Connected!");
-
-            let sql = `SELECT DISTINCT gender 
-                       FROM l9_gender
-                       ORDER BY gender`;
-
-            conn.query(sql, function(err, rows, fields) {
-                if(err) throw err;
-                resolve(rows);
-            });
-        }); // connect
-    }); // promise
-} // getCategories
-
-app.get("/dbTest", function(req, res) {
-
-    let conn = dbConnection();
-
-    conn.connect(function(err) {
-        if(err) throw err;
+    conn.connect(function (err) {
+        if (err) throw err;
         console.log("Connected!");
 
-        let sql = "SELECT * FROM l9_author";
+        let sql = "SELECT * FROM l9_author WHERE sex = 'F'";
 
-        conn.query(sql, function(err, rows, fields) {
-            if(err) throw err;
+        conn.query(sql, function (err, rows, fields) {
+            if (err) throw err;
+            conn.end();
             res.send(rows);
         });
-    });
-}); // dbTest
+    });//connect
+});//dbTest
 
-// db Connection
 function dbConnection() {
     let conn = mysql.createConnection({
         host: "if0ck476y7axojpg.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
@@ -179,6 +161,6 @@ function dbConnection() {
 };
 
 // starting server
-app.listen(process.env.PORT, process.env.IP, function() {
+app.listen(process.env.PORT || 3000, process.env.IP, function () {
     console.log("Express server is running...");
 });
